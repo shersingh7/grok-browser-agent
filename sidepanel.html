@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Grok Side Panel</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: 80px;
+            /* Space for input */
+        }
+
+        .message {
+            margin-bottom: 16px;
+            max-width: 85%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--bg-tertiary);
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.agent {
+            align-self: flex-start;
+            background-color: transparent;
+            /* Minimalist */
+            border: 1px solid var(--border-subtle);
+            margin-right: auto;
+            border-bottom-left-radius: 2px;
+        }
+
+        #input-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-primary);
+            border-top: 1px solid var(--border-subtle);
+            padding: 12px;
+        }
+
+        textarea {
+            resize: none;
+            min-height: 40px;
+            max-height: 120px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="flex items-center justify-end p-3 border-b border-subtle bg-primary">
+        <div class="flex gap-2">
+            <button id="yt-summary-btn" class="btn p-1 text-xs" style="display: none;" title="Summarize this video">
+                Summarize Video
+            </button>
+            <button id="context-btn" class="btn p-1 text-xs" title="Paste current page content into chat">
+                + Page Context
+            </button>
+        </div>
+    </div>
+
+    <!-- Embedded Grok Frame -->
+    <div id="frame-container" class="flex-1 w-full relative">
+        <div id="loading-overlay" class="absolute inset-0 flex items-center justify-center bg-primary z-10">
+            <span class="text-secondary">Loading Grok...</span>
+        </div>
+        <iframe id="grok-frame" src="https://grok.com" class="w-full h-full border-none"
+            allow="clipboard-read; clipboard-write"></iframe>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+
+</html>
