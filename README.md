@@ -67,4 +67,4 @@ MIT License - Use freely for personal or commercial projects.
 
 ---
 
-Created January 2026 | Vibe coded with AI assistance
+Created January 2026 by [shersingh7](https://github.com/shersingh7) | Vibe coded with AI assistance
