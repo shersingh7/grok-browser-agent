@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       autoOpen: settings.autoOpen ? settings.autoOpen.checked : true,
       pageIndicator: settings.pageIndicator ? settings.pageIndicator.checked : true,
       fullHtml: settings.fullHtml ? settings.fullHtml.checked : false,
-      articleText: settings.articleText ? settings.articleText.checked : true,
+      articleText: settings.articleText ? settings.articleText.checked : false,
       history: settings.history ? settings.history.checked : true,
     };
     try {

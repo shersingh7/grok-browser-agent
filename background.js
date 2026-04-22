@@ -130,7 +130,7 @@ async function handleMessage(request, sender, sendResponse) {
                     console.log('Article extraction failed, falling back to basic context');
                 }
 
-                if (articleText && settings.articleText !== false) {
+                if (articleText && settings.articleText === true) {
                     const truncated = articleText.length > 12000 ? articleText.substring(0, 12000) + "\n\n[Article truncated...]" : articleText;
                     fullPrompt = `URL: ${url}\nTitle: ${title}\n\nArticle Text:\n${truncated}\n\nPrompt: Summarize the key points of this article. Be concise but thorough.`;
                 } else {
