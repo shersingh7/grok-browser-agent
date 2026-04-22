@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Grok",
-  "version": "1.0.0",
+  "name": "Grok Browser Agent",
+  "version": "1.1.0",
   "description": "An AI assistant that works directly in your browser, powered by Grok.",
   "permissions": [
     "sidePanel",
@@ -23,29 +23,38 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Grok Browser Agent"
+    "default_title": "Grok Browser Agent",
+    "default_popup": "popup.html"
   },
   "side_panel": {
     "default_path": "sidepanel.html"
   },
+  "options_page": "options.html",
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+G",
+        "mac": "Command+Shift+G"
+      },
+      "description": "Open the Grok side panel"
+    },
+    "open-side-panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+G",
+        "mac": "Command+Shift+G"
+      },
+      "description": "Open the Grok side panel"
+    }
+  },
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "content.js"
-      ],
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
       "run_at": "document_idle"
     },
     {
-      "matches": [
-        "https://grok.com/*",
-        "https://x.com/i/grok*"
-      ],
-      "js": [
-        "grok-injector.js"
-      ],
+      "matches": ["https://grok.com/*", "https://x.com/i/grok*"],
+      "js": ["grok-injector.js"],
       "run_at": "document_idle",
       "all_frames": true
     }

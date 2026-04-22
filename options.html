@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Grok Browser Agent — Settings</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-primary">
+  <div class="settings-page">
+    <div class="settings-header">
+      <h1 class="settings-title">Grok Browser Agent</h1>
+      <p class="settings-subtitle">Configure how the agent interacts with your browser and Grok.</p>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">General</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Auto-open side panel</div>
+          <div class="settings-row-desc">Open the side panel automatically when clicking the extension icon</div>
+        </div>
+        <input type="checkbox" id="setting-auto-open" class="toggle" checked>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Show page indicator</div>
+          <div class="settings-row-desc">Display the current page title in the side panel toolbar</div>
+        </div>
+        <input type="checkbox" id="setting-page-indicator" class="toggle" checked>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Context & Privacy</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Send full page HTML</div>
+          <div class="settings-row-desc">Include raw HTML when sending page context (uses more tokens)</div>
+        </div>
+        <input type="checkbox" id="setting-full-html" class="toggle">
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Send article text</div>
+          <div class="settings-row-desc">Extract and send readable article text when available</div>
+        </div>
+        <input type="checkbox" id="setting-article-text" class="toggle" checked>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">History</div>
+          <div class="settings-row-desc">Save recent context injections to local history</div>
+        </div>
+        <input type="checkbox" id="setting-history" class="toggle" checked>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Keyboard Shortcuts</div>
+      <div class="settings-row" style="cursor:default;">
+        <div>
+          <div class="settings-row-label">Open side panel</div>
+          <div class="settings-row-desc">Global shortcut to open the Grok side panel</div>
+        </div>
+        <div class="flex items-center gap-1">
+          <kbd class="kbd">Ctrl</kbd>
+          <kbd class="kbd">Shift</kbd>
+          <kbd class="kbd">G</kbd>
+        </div>
+      </div>
+      <div class="settings-row" style="cursor:default;">
+        <div>
+          <div class="settings-row-label">Toggle history</div>
+          <div class="settings-row-desc">Show or hide the history drawer in the side panel</div>
+        </div>
+        <div class="flex items-center gap-1">
+          <kbd class="kbd">Ctrl</kbd>
+          <kbd class="kbd">Shift</kbd>
+          <kbd class="kbd">H</kbd>
+        </div>
+      </div>
+      <div class="text-xs text-muted mt-2" style="padding:0 var(--space-3);">
+        You can customize shortcuts at <code style="background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;">chrome://extensions/shortcuts</code>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Data</div>
+      <div class="settings-row" style="cursor:default;">
+        <div>
+          <div class="settings-row-label">Clear all history</div>
+          <div class="settings-row-desc">Remove all saved context history from local storage</div>
+        </div>
+        <button id="clear-history-btn" class="btn btn-sm" style="color:var(--error);border-color:rgba(248,113,113,0.2);">Clear</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="flex items-center justify-between text-xs text-muted">
+      <span>Grok Browser Agent v1.1.0</span>
+      <a href="https://github.com/shersingh7/grok-browser-agent" target="_blank" style="color:var(--text-secondary);text-decoration:none;">GitHub &rarr;</a>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

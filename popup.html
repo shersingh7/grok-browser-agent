@@ -1,37 +1,84 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <title>Grok Status</title>
+  <meta charset="UTF-8">
+  <title>Grok Browser Agent</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    body {
-      width: 300px;
-      padding: 16px;
-    }
+    body { width: 340px; }
   </style>
 </head>
-
-<body class="flex-col gap-4">
-  <div class="header flex items-center gap-2">
-    <!-- Placeholder for icon -->
-    <div style="width: 24px; height: 24px; background: white; border-radius: 4px;"></div>
-    <h1 class="text-lg font-bold m-0">Grok Browser Agent</h1>
+<body class="popup-body" id="popup-root">
+  <!-- Header -->
+  <div class="popup-header animate-fade-in">
+    <div class="popup-logo">G</div>
+    <div class="flex flex-col" style="min-width:0;">
+      <h1 class="popup-title">Grok Browser Agent</h1>
+      <span class="text-xs text-muted">AI in your sidebar</span>
+    </div>
+    <span class="popup-version">v1.1</span>
   </div>
 
-  <div id="status-container" class="p-3 bg-secondary border border-subtle rounded-md">
-    <div class="flex items-center gap-2 mb-2">
-      <div id="status-dot" class="w-2 h-2 rounded-full bg-red-500"></div>
-      <span id="status-text" class="font-mono text-sm">Checking authentication...</span>
+  <!-- Status Card -->
+  <div class="card animate-fade-in delay-1" id="status-card">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-2">
+        <div id="status-dot" class="status-dot inactive"></div>
+        <span id="status-text" class="text-sm font-medium">Checking connection...</span>
+      </div>
+      <span id="status-badge" class="badge badge-warning">Unknown</span>
     </div>
-    <p class="text-xs text-secondary m-0">
-      Please log in to grok.com to enable agent capabilities.
+    <p class="text-xs text-muted m-0" id="status-desc">
+      Checking if you're logged in to Grok.
     </p>
   </div>
 
-  <button id="open-panel-btn" class="btn btn-primary w-full">Open Side Panel</button>
+  <!-- Quick Actions -->
+  <div class="animate-fade-in delay-2">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs text-muted font-medium uppercase" style="letter-spacing:0.04em;">Quick Actions</span>
+    </div>
+    <div class="quick-actions">
+      <button id="open-panel-btn" class="quick-action-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></svg>
+        <span>Open Side Panel</span>
+        <span class="quick-action-label">Ask Grok anything</span>
+      </button>
+      <button id="page-context-btn" class="quick-action-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Page Context</span>
+        <span class="quick-action-label">Send current page</span>
+      </button>
+      <button id="summarize-btn" class="quick-action-btn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span>Summarize</span>
+        <span class="quick-action-label" id="summarize-label">Not on a page</span>
+      </button>
+      <button id="settings-btn" class="quick-action-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+        <span class="quick-action-label">Configure agent</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="flex-1 min-h-0 animate-fade-in delay-3" id="recent-section">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs text-muted font-medium uppercase" style="letter-spacing:0.04em;">Recent Activity</span>
+      <button id="clear-recent-btn" class="btn btn-ghost btn-sm" style="display:none;">Clear</button>
+    </div>
+    <div class="recent-list" id="recent-list">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="flex items-center justify-between animate-fade-in delay-4">
+    <span class="text-xs text-muted">Press <kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Shift</kbd>+<kbd class="kbd">G</kbd></span>
+    <a href="https://grok.com" target="_blank" class="text-xs text-secondary" style="text-decoration:none;">grok.com &rarr;</a>
+  </div>
 
   <script src="popup.js"></script>
 </body>
-
 </html>

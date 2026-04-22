@@ -5,7 +5,7 @@
 
 console.log("Grok Injector: Loaded inside iframe.");
 
-// Announce presence to background script so it knows where to send prompts
+// Announce presence
 chrome.runtime.sendMessage({ type: 'GROK_FRAME_READY' });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -17,66 +17,138 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Listen for direct messages from the Side Panel (parent window)
 window.addEventListener('message', (event) => {
-    // Optional: Check origin if needed, but for now we accept to ensure it works.
-    // console.log("Grok Injector received window message:", event.data);
     if (event.data && event.data.type === 'FILL_PROMPT' && event.data.prompt) {
         fillPrompt(event.data.prompt);
     }
 });
 
 async function fillPrompt(text) {
-    console.log("Grok Injector: Filling prompt...", text.substring(0, 50));
+    console.log("Grok Injector: Filling prompt...", text.substring(0, 60));
 
-    // Priority 1: ProseMirror (Grok's specific editor)
-    let input = document.querySelector('.ProseMirror');
+    // Try multiple selector strategies in order of specificity
+    const selectors = [
+        '.ProseMirror',
+        '[contenteditable="true"]',
+        'textarea',
+        'div[role="textbox"]',
+        'input[type="text"]'
+    ];
 
-    // Priority 2: Generic ContentEditable
-    if (!input) {
-        input = document.querySelector('div[contenteditable="true"]');
+    let input = null;
+    for (const sel of selectors) {
+        input = document.querySelector(sel);
+        if (input) break;
     }
 
-    // Priority 3: Textarea
+    // Also try finding by placeholder text
     if (!input) {
-        input = document.querySelector('textarea');
-    }
-
-    if (input) {
-        input.focus();
-        await new Promise(r => setTimeout(r, 50)); // Wait for focus
-
-        if (input.tagName === 'TEXTAREA') {
-            const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-            if (nativeTextAreaValueSetter) {
-                nativeTextAreaValueSetter.call(input, text);
-            } else {
-                input.value = text;
-            }
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-            input.style.height = 'auto';
-            input.style.height = input.scrollHeight + 'px';
-        } else {
-            // ContentEditable (ProseMirror/Tiptap)
-            // execCommand 'insertText' is the best way to simulate user input for these editors
-            try {
-                // Clear existing content if it fits the "new prompt" paradigm, 
-                // but simpler to just replace/insert. 
-                // If we want to replace everything, we should select all first.
-                // For now, let's just insert.
-                const success = document.execCommand('insertText', false, text);
-                if (!success) throw new Error("execCommand failed");
-            } catch (e) {
-                // Fallback
-                input.textContent = text;
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+        const placeholders = ['Ask anything', 'Message', 'Search', 'Type a message'];
+        for (const ph of placeholders) {
+            input = document.querySelector(`[placeholder*="${ph}" i]`);
+            if (input) break;
         }
-
-        console.log("Grok Injector: Text injected.");
-
-        // Attempt to hit Enter if requested? No, user might want to review.
-    } else {
-        console.warn("Grok Injector: Could not find chat input.");
-        alert("Grok Browser Agent: I couldn't find the chat box! Please click on the 'Ask anything' box and try again.");
     }
+
+    if (!input) {
+        console.warn("Grok Injector: Could not find chat input.");
+        // Visual feedback instead of alert
+        showInjectorToast("Couldn't find the chat input. Please click the text box and try again.");
+        return;
+    }
+
+    input.focus();
+    await new Promise(r => setTimeout(r, 80));
+
+    // Scroll input into view
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    if (input.tagName === 'TEXTAREA' || input.tagName === 'INPUT') {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+            input.tagName === 'TEXTAREA'
+                ? window.HTMLTextAreaElement.prototype
+                : window.HTMLInputElement.prototype,
+            "value"
+        )?.set;
+
+        if (nativeSetter) {
+            nativeSetter.call(input, text);
+        } else {
+            input.value = text;
+        }
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        if (input.tagName === 'TEXTAREA') {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 200) + 'px';
+        }
+    } else if (input.isContentEditable || input.getAttribute('contenteditable') === 'true') {
+        // ContentEditable (ProseMirror / Tiptap)
+        try {
+            // Select all existing content first
+            const range = document.createRange();
+            range.selectNodeContents(input);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            const success = document.execCommand('insertText', false, text);
+            if (!success) throw new Error("execCommand failed");
+        } catch (e) {
+            // Fallback: direct text replacement
+            input.innerHTML = '';
+            const textNode = document.createTextNode(text);
+            input.appendChild(textNode);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }
+
+    console.log("Grok Injector: Text injected successfully.");
+
+    // Brief visual flash on the input to confirm injection
+    const originalTransition = input.style.transition;
+    input.style.transition = 'box-shadow 0.3s ease';
+    input.style.boxShadow = '0 0 0 2px rgba(255, 255, 255, 0.15)';
+    setTimeout(() => {
+        input.style.boxShadow = '';
+        input.style.transition = originalTransition;
+    }, 800);
+}
+
+function showInjectorToast(message) {
+    // Create a toast inside the Grok iframe since we can't use the sidepanel's toast
+    const existing = document.getElementById('grok-agent-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'grok-agent-toast';
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1a1a1e;
+        color: #f0f0f5;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 13px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        z-index: 99999;
+        animation: fadeIn 0.25s ease;
+        max-width: 90%;
+        text-align: center;
+    `;
+    toast.textContent = message;
+
+    const style = document.createElement('style');
+    style.textContent = `@keyframes fadeIn { from { opacity:0; transform: translateX(-50%) translateY(8px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }`;
+    document.head.appendChild(style);
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
 }
